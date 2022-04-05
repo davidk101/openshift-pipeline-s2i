@@ -1,0 +1,48 @@
+apiVersion: tekton.dev/v1beta1
+kind: Pipeline
+metadata:
+  managedFields:
+    - apiVersion: tekton.dev/v1beta1
+      fieldsType: FieldsV1
+      fieldsV1:
+        'f:spec':
+          .: {}
+          'f:params': {}
+          'f:tasks': {}
+          'f:workspaces': {}
+      manager: Mozilla
+      operation: Update
+  name: s2i-java-pipeline
+  namespace: openshift-namespace
+spec:
+  params:
+    - description: Location of the repo where image has to be pushed
+      name: IMAGE
+      type: string
+  tasks:
+    - name: fetch-repository
+      params:
+        - name: url
+          value: 'https://github.com/user/repo.git'
+        - name: subdirectory
+          value: ''
+        - name: deleteExisting
+          value: 'true'
+      taskRef:
+        kind: Task
+        name: git-clone
+      workspaces:
+        - name: output
+          workspace: maven-repo-pvc
+    - name: s2i
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE)
+      taskRef:
+        kind: Task
+        name: s2i-java
+      workspaces:
+        - name: source
+          workspace: maven-repo-pvc
+  workspaces:
+    - name: maven-repo-pvc
