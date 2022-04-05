@@ -1,0 +1,20 @@
+apiVersion: tekton.dev/v1beta1
+kind: PipelineRun
+metadata:
+  name: s2i-java-pipelinerun
+spec:
+  serviceAccountName: pipeline
+  pipelineRunRef:
+    name: s2i-java-pipeline
+  params:
+  - name: IMAGE
+    value: quay.io/my-repo/my-image-name
+  workspaces:
+  - name: maven-repo-pvc
+    volumeClaimTemplate:
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 1Gi
